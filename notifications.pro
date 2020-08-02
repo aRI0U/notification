@@ -24,16 +24,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+        MainWindow.cpp \
+        Notifications/NotificationManager.cpp \
         Notifications/NotificationWidget.cpp \
-        Notifications/NotificationLayout.cpp \
-        Result/Result.cpp \
-        Operation/Operation.cpp
-
-HEADERS  += mainwindow.h \
+        Notifications/NotificationLayout.cpp
+HEADERS  += \
+        MainWindow.h \
+        Notifications/NotificationManager.h \
         Notifications/NotificationWidget.h \
-        Notifications/NotificationLayout.h \
-        Result/Result.h \
-        Operation/Operation.h
+        Notifications/NotificationLayout.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    MainWindow.ui

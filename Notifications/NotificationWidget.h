@@ -1,21 +1,17 @@
-#pragma once
+#ifndef NOTIFICATIONWIDGET_H
+#define NOTIFICATIONWIDGET_H
 
-#include "Result/Result.h"
-
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPainter>
+#include <QPropertyAnimation>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <QWidget>
 
 #include <functional>
-
-class QPaintEvent;
-class QPushButton;
-
-struct NotificationParams
-{
-    Result message;
-    QString title;
-    QString detailsButtonText = "Details";
-    std::function<void()> callback;
-};
 
 class NotificationWidget : public QWidget
 {
@@ -24,21 +20,20 @@ class NotificationWidget : public QWidget
     Q_PROPERTY(float opacity READ windowOpacity WRITE setWindowOpacity)
 
 public:
-    explicit NotificationWidget(const NotificationParams& params, QWidget* parent = 0);
+    explicit NotificationWidget(QWidget* parent = nullptr, const QString title = "", const QString message = "");
 
 signals:
     void CloseButtonClicked(NotificationWidget* current);
-    void DetailsButtonClicked(NotificationWidget* current);
 
 private slots:
     void OnCloseButtonClicked();
-    void OnDetailsButtonClicked();
 
 private:
-    void InitUI(const NotificationParams& params);
+    void initUI(const QString title, const QString message);
 
     void paintEvent(QPaintEvent* event) override;
 
     QPushButton* closeButton = nullptr;
     QPushButton* detailsButton = nullptr;
 };
+#endif // NOTIFICATIONWIDGET_H

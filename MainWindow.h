@@ -20,6 +20,6 @@ private slots:
     void on_pushButton_error_clicked();
     
 private:
-    Ui::MainWindow *ui;
-    NotificationLayout notificationLayout;
+    Ui::MainWindow* ui;
+    NotificationLayout* notificationLayout;
 };

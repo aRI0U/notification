@@ -1,11 +1,12 @@
-#pragma once
+#ifndef NOTIFICATIONLAYOUT_H
+#define NOTIFICATIONLAYOUT_H
 
-#include "Notifications/NotificationWidget.h"
-
-#include <QObject>
-#include <QMap>
-#include <QElapsedTimer>
 #include <QBasicTimer>
+#include <QElapsedTimer>
+#include <QMap>
+#include <QObject>
+
+#include "NotificationWidget.h"
 
 class NotificationLayout : public QObject
 {
@@ -15,19 +16,17 @@ public:
     NotificationLayout();
     ~NotificationLayout() override;
 
-    void AddNotificationWidget(QWidget* parent, const NotificationParams& params);
+    void addNotificationWidget(QWidget* parent, const QString title, const QString message);
     void SetLayoutType(Qt::Alignment align);
     void SetDisplayTimeMs(int displayTimeMS);
 
 private slots:
-    void OnCloseClicked(NotificationWidget* notification);
-    void OnDetailsClicked(NotificationWidget* notification);
-    void OnWidgetDestroyed();
-    void OnParentWidgetDestroyed();
+    void onCloseClicked(NotificationWidget* notification);
+    void onWidgetDestroyed();
+    void onParentWidgetDestroyed();
 
 private:
-    void LayoutWidgets(QWidget* parent);
-    void Clear();
+    void layoutWidgets(QWidget* parent);
 
     bool eventFilter(QObject* object, QEvent* event) override;
     void timerEvent(QTimerEvent* event) override;
@@ -45,3 +44,5 @@ private:
     QElapsedTimer elapsedTimer;
     QBasicTimer basicTimer;
 };
+
+#endif // NOTIFICATIONLAYOUT_H

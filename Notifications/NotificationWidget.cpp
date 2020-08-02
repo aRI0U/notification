@@ -1,67 +1,20 @@
-#include "Notifications/NotificationWidget.h"
+#include "NotificationWidget.h"
 
-#include <QString>
-#include <QTimer>
-#include <QApplication>
-#include <QMessageBox>
-#include <QDesktopWidget>
-#include <QPropertyAnimation>
-
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-
-#include <QLabel>
-#include <QPushButton>
-
-#include <QPainter>
-#include <Qt>
-
-namespace NotificationWidgetDetails
-{
-static std::vector<std::pair<QMessageBox::Icon, Result::ResultType>> notificationIconsConvertor =
-{
-  std::make_pair(QMessageBox::Information, Result::RESULT_SUCCESS),
-  std::make_pair(QMessageBox::Warning, Result::RESULT_WARNING),
-  std::make_pair(QMessageBox::Critical, Result::RESULT_ERROR)
-};
-
-QMessageBox::Icon Convert(const Result::ResultType& type)
-{
-    using IconNode = std::pair<QMessageBox::Icon, Result::ResultType>;
-    auto iter = std::find_if(notificationIconsConvertor.begin(), notificationIconsConvertor.end(), [type](const IconNode& node)
-                             {
-                                 return node.second == type;
-                             });
-    Q_ASSERT(iter != notificationIconsConvertor.end());
-    return iter->first;
-}
-
-QString ColorToHTML(const QColor& color)
-{
-    QString ret = QString("#%1%2%3%4")
-                  .arg(color.alpha(), 2, 16, QChar('0'))
-                  .arg(color.red(), 2, 16, QChar('0'))
-                  .arg(color.green(), 2, 16, QChar('0'))
-                  .arg(color.blue(), 2, 16, QChar('0'));
-    return ret;
-}
-} //namespace NotificationWidgetDetails
-
-NotificationWidget::NotificationWidget(const NotificationParams& params, QWidget* parent)
+NotificationWidget::NotificationWidget(QWidget* parent, const QString title, const QString message)
     : QWidget(parent)
 {
     //operator | declared in the global namespace
     //without this string compilation will be failed
-    using ::operator|;
-    Qt::WindowFlags flags = (Qt::FramelessWindowHint | // Disable window decoration
-                             Qt::Tool // Discard display in a separate window
-                             );
+    Qt::WindowFlags flags = (
+                  Qt::FramelessWindowHint    // Disable window decoration
+                | Qt::Tool                   // Discard display in a separate window
+                | Qt::WindowStaysOnTopHint);
     setWindowFlags(flags);
 
     setAttribute(Qt::WA_TranslucentBackground); // Indicates that the background will be transparent
     setAttribute(Qt::WA_ShowWithoutActivating); // At the show, the widget does not get the focus automatically
 
-    InitUI(params);
+    initUI(title, message);
 
     QDesktopWidget* desktop = QApplication::desktop();
     QRect geometry = desktop->availableGeometry(parent);
@@ -74,13 +27,7 @@ void NotificationWidget::OnCloseButtonClicked()
     emit CloseButtonClicked(this);
 }
 
-void NotificationWidget::OnDetailsButtonClicked()
-{
-    emit DetailsButtonClicked(this);
-}
-
-void NotificationWidget::InitUI(const NotificationParams& params)
-{
+void NotificationWidget::initUI(const QString title, const QString message) {
     QHBoxLayout* mainLayout = new QHBoxLayout();
     mainLayout->setContentsMargins(10, 10, 10, 10);
 
@@ -92,26 +39,11 @@ void NotificationWidget::InitUI(const NotificationParams& params)
     titleLayout->setSpacing(10);
     messageLayout->addItem(titleLayout);
 
-    QFont currentFont = font();
-    QFontMetrics fm(currentFont);
-    int fontHeight = fm.height();
-    QLabel* iconLabel = new QLabel();
-    QMessageBox::Icon icon = NotificationWidgetDetails::Convert(params.message.type);
-    QPixmap image = QMessageBox::standardIcon(icon).scaled(QSize(fontHeight, fontHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    iconLabel->setPixmap(image);
-    iconLabel->setScaledContents(false);
-    titleLayout->addWidget(iconLabel);
+    QLabel* labelTitle = new QLabel(title);
+    labelTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+    labelTitle->setStyleSheet("font-weight: bold; color: blue;");
+    titleLayout->addWidget(labelTitle);
 
-    if (params.title.isEmpty() == false)
-    {
-        QString title = params.title;
-        QLabel* labelTitle = new QLabel(title);
-        labelTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-        labelTitle->setStyleSheet("font-weight: bold;");
-        titleLayout->addWidget(labelTitle);
-    }
-
-    QString message = params.message.message;
     QLabel* labelMessage = new QLabel(message);
     labelMessage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     labelMessage->setWordWrap(true);
@@ -124,36 +56,14 @@ void NotificationWidget::InitUI(const NotificationParams& params)
     QColor pressedColor = baseColor;
     pressedColor.setAlpha(255);
 
-    QString styleSheet = QString("QPushButton {"
-                                 "border-radius: 1px;"
-                                 "background-color: " +
-                                 NotificationWidgetDetails::ColorToHTML(buttonColor) + ";"
-                                                                                       "padding: 5px;"
-                                                                                       "}"
-                                                                                       "QPushButton:pressed {"
-                                                                                       "background-color: " +
-                                 NotificationWidgetDetails::ColorToHTML(pressedColor) + ";"
-                                                                                        "}");
-
     QVBoxLayout* buttonsLayout = new QVBoxLayout();
     buttonsLayout->setContentsMargins(0, 0, 0, 0);
     buttonsLayout->setSpacing(5);
     {
         closeButton = new QPushButton(tr("Close"));
-        closeButton->setObjectName("CloseButton");
-        closeButton->setStyleSheet(styleSheet);
         closeButton->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
         buttonsLayout->addWidget(closeButton);
-        connect(closeButton, &QPushButton::clicked, this, &NotificationWidget::OnCloseButtonClicked);
-    }
-    if (params.callback)
-    {
-        detailsButton = new QPushButton(params.detailsButtonText);
-        detailsButton->setObjectName("DetailsButton");
-        detailsButton->setStyleSheet(styleSheet);
-        detailsButton->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
-        buttonsLayout->addWidget(detailsButton);
-        connect(detailsButton, &QPushButton::clicked, this, &NotificationWidget::OnDetailsButtonClicked);
+        connect(closeButton, SIGNAL(clicked()), this, SLOT(OnCloseButtonClicked()));
     }
     mainLayout->addItem(buttonsLayout);
     setLayout(mainLayout);
