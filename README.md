@@ -1,8 +1,8 @@
 # QT popup notification messages
 
-This repository is a fork of [https://github.com/ctin/notification]. Compared to the original implementation, it contains less code but enables only to display messages. It is also easier to integrate into an existing QT project.
+This repository is a fork of [https://github.com/ctin/notification](https://github.com/ctin/notification). Compared to the original implementation, it contains less code but enables only to display messages. It is also easier to integrate into an existing QT project.
 
-All the code needed to display notifications is in the `Notifications/` directory. Other files are given as an example.
+All the code needed to display notifications is in the `Notifications/` directory. Other files are given as an example. The only dependencies are QT ones.
 
 ## Usage
 

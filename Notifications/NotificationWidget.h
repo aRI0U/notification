@@ -11,8 +11,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <functional>
-
 class NotificationWidget : public QWidget
 {
     Q_OBJECT
